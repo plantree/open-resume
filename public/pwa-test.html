@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA测试 - OpenResume</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .status-item {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .status-success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .status-error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .status-warning {
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+            color: #856404;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 OpenResume PWA功能测试</h1>
+    
+    <h2>📋 PWA功能检测</h2>
+    <div id="manifest-status" class="status-item">正在检测Manifest文件...</div>
+    <div id="sw-status" class="status-item">正在检测Service Worker...</div>
+    <div id="install-status" class="status-item">正在检测安装功能...</div>
+    <div id="offline-status" class="status-item">正在检测离线功能...</div>
+    
+    <h2>🔧 PWA操作</h2>
+    <button id="install-btn" class="hidden">安装PWA应用</button>
+    <button id="sw-update-btn">更新Service Worker</button>
+    <button id="test-offline-btn">测试离线功能</button>
+    
+    <h2>📊 技术信息</h2>
+    <div id="tech-info">
+        <p><strong>用户代理:</strong> <span id="user-agent"></span></p>
+        <p><strong>支持Service Worker:</strong> <span id="sw-support"></span></p>
+        <p><strong>支持Web App Manifest:</strong> <span id="manifest-support"></span></p>
+        <p><strong>显示模式:</strong> <span id="display-mode"></span></p>
+        <p><strong>网络状态:</strong> <span id="network-status"></span></p>
+    </div>
+    
+    <h2>🔗 快速链接</h2>
+    <p>
+        <a href="/">返回主页</a> |
+        <a href="/resume-builder">创建简历</a> |
+        <a href="/resume-import">导入简历</a> |
+        <a href="/manifest.json" target="_blank">查看Manifest</a>
+    </p>
+
+    <script>
+        let deferredPrompt;
+        
+        // 检测功能支持
+        function checkSupport() {
+            // Service Worker支持
+            const swSupport = 'serviceWorker' in navigator;
+            document.getElementById('sw-support').textContent = swSupport ? '✅ 支持' : '❌ 不支持';
+            
+            // Manifest支持  
+            const manifestSupport = 'serviceWorker' in navigator;
+            document.getElementById('manifest-support').textContent = manifestSupport ? '✅ 支持' : '❌ 不支持';
+            
+            // 用户代理
+            document.getElementById('user-agent').textContent = navigator.userAgent;
+            
+            // 显示模式
+            const displayMode = window.matchMedia('(display-mode: standalone)').matches ? 'Standalone (PWA)' : 'Browser';
+            document.getElementById('display-mode').textContent = displayMode;
+            
+            // 网络状态
+            updateNetworkStatus();
+        }
+        
+        // 更新网络状态
+        function updateNetworkStatus() {
+            const status = navigator.onLine ? '🟢 在线' : '🔴 离线';
+            document.getElementById('network-status').textContent = status;
+        }
+        
+        // 检测Manifest
+        async function checkManifest() {
+            try {
+                const response = await fetch('/manifest.json');
+                if (response.ok) {
+                    const manifest = await response.json();
+                    document.getElementById('manifest-status').className = 'status-item status-success';
+                    document.getElementById('manifest-status').textContent = 
+                        `✅ Manifest文件加载成功: ${manifest.name}`;
+                } else {
+                    throw new Error('无法加载Manifest');
+                }
+            } catch (error) {
+                document.getElementById('manifest-status').className = 'status-item status-error';
+                document.getElementById('manifest-status').textContent = `❌ Manifest检测失败: ${error.message}`;
+            }
+        }
+        
+        // 检测Service Worker
+        async function checkServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registration = await navigator.serviceWorker.getRegistration();
+                    if (registration) {
+                        document.getElementById('sw-status').className = 'status-item status-success';
+                        document.getElementById('sw-status').textContent = 
+                            `✅ Service Worker已注册: ${registration.scope}`;
+                    } else {
+                        // 尝试注册
+                        const newRegistration = await navigator.serviceWorker.register('/sw.js');
+                        document.getElementById('sw-status').className = 'status-item status-success';
+                        document.getElementById('sw-status').textContent = 
+                            `✅ Service Worker注册成功: ${newRegistration.scope}`;
+                    }
+                } catch (error) {
+                    document.getElementById('sw-status').className = 'status-item status-error';
+                    document.getElementById('sw-status').textContent = 
+                        `❌ Service Worker检测失败: ${error.message}`;
+                }
+            } else {
+                document.getElementById('sw-status').className = 'status-item status-error';
+                document.getElementById('sw-status').textContent = '❌ 浏览器不支持Service Worker';
+            }
+        }
+        
+        // 检测安装功能
+        function checkInstallability() {
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                document.getElementById('install-status').className = 'status-item status-success';
+                document.getElementById('install-status').textContent = '✅ 应用已安装并在独立模式下运行';
+            } else if (deferredPrompt) {
+                document.getElementById('install-status').className = 'status-item status-warning';
+                document.getElementById('install-status').textContent = '⚠️ 应用可以安装';
+                document.getElementById('install-btn').classList.remove('hidden');
+            } else {
+                document.getElementById('install-status').className = 'status-item status-warning';
+                document.getElementById('install-status').textContent = '⚠️ 等待安装提示或不支持安装';
+            }
+        }
+        
+        // 检测离线功能
+        function checkOffline() {
+            if (navigator.onLine) {
+                document.getElementById('offline-status').className = 'status-item status-success';
+                document.getElementById('offline-status').textContent = '✅ 当前在线，Service Worker将缓存资源';
+            } else {
+                document.getElementById('offline-status').className = 'status-item status-warning';
+                document.getElementById('offline-status').textContent = '⚠️ 当前离线，正在使用缓存资源';
+            }
+        }
+        
+        // 事件监听
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            checkInstallability();
+        });
+        
+        window.addEventListener('appinstalled', () => {
+            deferredPrompt = null;
+            checkInstallability();
+        });
+        
+        window.addEventListener('online', updateNetworkStatus);
+        window.addEventListener('offline', updateNetworkStatus);
+        
+        // 按钮事件
+        document.getElementById('install-btn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`安装结果: ${outcome}`);
+                deferredPrompt = null;
+                checkInstallability();
+            }
+        });
+        
+        document.getElementById('sw-update-btn').addEventListener('click', async () => {
+            if ('serviceWorker' in navigator) {
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration) {
+                    registration.update();
+                    alert('Service Worker更新请求已发送');
+                }
+            }
+        });
+        
+        document.getElementById('test-offline-btn').addEventListener('click', () => {
+            window.open('/offline', '_blank');
+        });
+        
+        // 初始化检测
+        document.addEventListener('DOMContentLoaded', () => {
+            checkSupport();
+            checkManifest();
+            checkServiceWorker();
+            checkInstallability();
+            checkOffline();
+        });
+    </script>
+</body>
+</html>

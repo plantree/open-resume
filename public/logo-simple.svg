@@ -1,0 +1,21 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 白色背景 -->
+  <rect x="0" y="0" width="200" height="200" fill="white"/>
+  
+  <!-- O - 圆形，代表 OpenResume 的 "O" -->
+  <circle cx="70" cy="100" r="30" 
+          fill="none" stroke="#4F46E5" stroke-width="8" stroke-linecap="round"/>
+  
+  <!-- R - 简化设计，代表 OpenResume 的 "R" -->
+  <g transform="translate(130, 55)">
+    <!-- R 的竖线 -->
+    <line x1="0" y1="0" x2="0" y2="90" 
+          stroke="#4F46E5" stroke-width="8" stroke-linecap="round"/>
+    <!-- R 的上半部分 -->
+    <path d="M 0 0 L 30 0 Q 45 0 45 22.5 Q 45 45 30 45 L 0 45" 
+          fill="none" stroke="#4F46E5" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- R 的斜线 -->
+    <line x1="22.5" y1="45" x2="45" y2="90" 
+          stroke="#4F46E5" stroke-width="8" stroke-linecap="round"/>
+  </g>
+</svg>
