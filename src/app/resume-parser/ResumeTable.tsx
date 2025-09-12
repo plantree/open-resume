@@ -59,22 +59,22 @@ export const ResumeTable = ({ resume }: { resume: Resume }) => {
   return (
     <table className="mt-2 w-full border text-sm text-gray-900">
       <tbody className="divide-y text-left align-top">
-        <TableRowHeader>Profile</TableRowHeader>
-        <TableRow label="Name" value={resume.profile.name} />
-        <TableRow label="Email" value={resume.profile.email} />
-        <TableRow label="Phone" value={resume.profile.phone} />
-        <TableRow label="Location" value={resume.profile.location} />
-        <TableRow label="Link" value={resume.profile.url} />
-        <TableRow label="Summary" value={resume.profile.summary} />
-        <TableRowHeader>Education</TableRowHeader>
+        <TableRowHeader>个人信息</TableRowHeader>
+        <TableRow label="姓名" value={resume.profile.name} />
+        <TableRow label="邮箱" value={resume.profile.email} />
+        <TableRow label="电话" value={resume.profile.phone} />
+        <TableRow label="地址" value={resume.profile.location} />
+        <TableRow label="个人网站" value={resume.profile.url} />
+        <TableRow label="个人简介" value={resume.profile.summary} />
+        <TableRowHeader>教育背景</TableRowHeader>
         {educations.map((education, idx) => (
           <Fragment key={idx}>
-            <TableRow label="School" value={education.school} />
-            <TableRow label="Degree" value={education.degree} />
-            <TableRow label="GPA" value={education.gpa} />
-            <TableRow label="Date" value={education.date} />
+            <TableRow label="学校" value={education.school} />
+            <TableRow label="学位" value={education.degree} />
+            <TableRow label="绩点" value={education.gpa} />
+            <TableRow label="时间" value={education.date} />
             <TableRow
-              label="Descriptions"
+              label="详细描述"
               value={education.descriptions}
               className={
                 educations.length - 1 !== 0 &&
@@ -84,14 +84,14 @@ export const ResumeTable = ({ resume }: { resume: Resume }) => {
             />
           </Fragment>
         ))}
-        <TableRowHeader>Work Experience</TableRowHeader>
+        <TableRowHeader>工作经历</TableRowHeader>
         {workExperiences.map((workExperience, idx) => (
           <Fragment key={idx}>
-            <TableRow label="Company" value={workExperience.company} />
-            <TableRow label="Job Title" value={workExperience.jobTitle} />
-            <TableRow label="Date" value={workExperience.date} />
+            <TableRow label="公司" value={workExperience.company} />
+            <TableRow label="职位" value={workExperience.jobTitle} />
+            <TableRow label="时间" value={workExperience.date} />
             <TableRow
-              label="Descriptions"
+              label="详细描述"
               value={workExperience.descriptions}
               className={
                 workExperiences.length - 1 !== 0 &&
@@ -102,14 +102,14 @@ export const ResumeTable = ({ resume }: { resume: Resume }) => {
           </Fragment>
         ))}
         {resume.projects.length > 0 && (
-          <TableRowHeader>Projects</TableRowHeader>
+          <TableRowHeader>项目经验</TableRowHeader>
         )}
         {resume.projects.map((project, idx) => (
           <Fragment key={idx}>
-            <TableRow label="Project" value={project.project} />
-            <TableRow label="Date" value={project.date} />
+            <TableRow label="项目名称" value={project.project} />
+            <TableRow label="时间" value={project.date} />
             <TableRow
-              label="Descriptions"
+              label="详细描述"
               value={project.descriptions}
               className={
                 resume.projects.length - 1 !== 0 &&
@@ -119,8 +119,8 @@ export const ResumeTable = ({ resume }: { resume: Resume }) => {
             />
           </Fragment>
         ))}
-        <TableRowHeader>Skills</TableRowHeader>
-        <TableRow label="Descriptions" value={skills} />
+        <TableRowHeader>技能特长</TableRowHeader>
+        <TableRow label="技能描述" value={skills} />
       </tbody>
     </table>
   );

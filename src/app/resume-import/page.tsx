@@ -21,7 +21,7 @@ export default function ImportResume() {
         {!hasUsedAppBefore ? (
           <>
             <h1 className="text-lg font-semibold text-gray-900">
-              Import data from an existing resume
+              从现有简历导入数据
             </h1>
             <ResumeDropzone
               onFileUrlChange={onFileUrlChange}
@@ -31,8 +31,8 @@ export default function ImportResume() {
               <>
                 <OrDivider />
                 <SectionWithHeadingAndCreateButton
-                  heading="Don't have a resume yet?"
-                  buttonText="Create from scratch"
+                  heading="还没有简历？"
+                  buttonText="从头开始创建"
                 />
               </>
             )}
@@ -42,14 +42,14 @@ export default function ImportResume() {
             {!hasAddedResume && (
               <>
                 <SectionWithHeadingAndCreateButton
-                  heading="You have data saved in browser from prior session"
-                  buttonText="Continue where I left off"
+                  heading="您在浏览器中保存了之前会话的数据"
+                  buttonText="继续未完成的工作"
                 />
                 <OrDivider />
               </>
             )}
             <h1 className="font-semibold text-gray-900">
-              Override data with a new resume
+              使用新简历覆盖数据
             </h1>
             <ResumeDropzone
               onFileUrlChange={onFileUrlChange}
@@ -65,7 +65,7 @@ export default function ImportResume() {
 const OrDivider = () => (
   <div className="mx-[-2.5rem] flex items-center pb-6 pt-8" aria-hidden="true">
     <div className="flex-grow border-t border-gray-200" />
-    <span className="mx-2 mt-[-2px] flex-shrink text-lg text-gray-400">or</span>
+    <span className="mx-2 mt-[-2px] flex-shrink text-lg text-gray-400">或</span>
     <div className="flex-grow border-t border-gray-200" />
   </div>
 );

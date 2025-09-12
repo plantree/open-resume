@@ -68,12 +68,12 @@ export const AutoTypingResume = () => {
             fontSize: "12",
             formToHeading: {
               workExperiences: resume.workExperiences[0].company
-                ? "WORK EXPERIENCE"
+                ? "工作经历"
                 : "",
-              educations: resume.educations[0].school ? "EDUCATION" : "",
-              projects: resume.projects[0].project ? "PROJECT" : "",
-              skills: resume.skills.featuredSkills[0].skill ? "SKILLS" : "",
-              custom: "CUSTOM SECTION",
+              educations: resume.educations[0].school ? "教育背景" : "",
+              projects: resume.projects[0].project ? "项目经验" : "",
+              skills: resume.skills.featuredSkills[0].skill ? "技能特长" : "",
+              custom: "自定义模块",
             },
           }}
         />
