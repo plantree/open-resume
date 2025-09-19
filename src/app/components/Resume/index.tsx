@@ -54,6 +54,8 @@ export const Resume = () => {
             documentSize={settings.documentSize}
             document={document}
             fileName={resume.profile.name + " - Resume"}
+            resume={resume}
+            settings={settings}
           />
         </div>
         <ResumeControlBarBorder />

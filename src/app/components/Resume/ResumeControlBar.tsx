@@ -1,12 +1,16 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSetDefaultScale } from "components/Resume/hooks";
 import {
   MagnifyingGlassIcon,
   ArrowDownTrayIcon,
+  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 import { usePDF } from "@react-pdf/renderer";
 import dynamic from "next/dynamic";
+import { exportResumeToYaml, downloadYamlFile, generateYamlFileName } from "lib/yaml-utils";
+import type { Resume } from "lib/redux/types";
+import type { Settings } from "lib/redux/settingsSlice";
 
 const ResumeControlBar = ({
   scale,
@@ -14,17 +18,23 @@ const ResumeControlBar = ({
   documentSize,
   document,
   fileName,
+  resume,
+  settings,
 }: {
   scale: number;
   setScale: (scale: number) => void;
   documentSize: string;
   document: JSX.Element;
   fileName: string;
+  resume: Resume;
+  settings: Settings;
 }) => {
   const { scaleOnResize, setScaleOnResize } = useSetDefaultScale({
     setScale,
     documentSize,
   });
+  const [showDownloadMenu, setShowDownloadMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const [instance, update] = usePDF({ document });
 
@@ -34,6 +44,37 @@ const ResumeControlBar = ({
       (update as any)();
     }
   }, [update, document]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowDownloadMenu(false);
+      }
+    };
+
+    window.document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      window.document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleDownloadYaml = () => {
+    const yamlContent = exportResumeToYaml(resume, settings);
+    const yamlFileName = generateYamlFileName(resume);
+    downloadYamlFile(yamlContent, yamlFileName);
+    setShowDownloadMenu(false);
+  };
+
+  const handleDownloadPdf = () => {
+    if (instance.url) {
+      const link = window.document.createElement('a');
+      link.href = instance.url;
+      link.download = fileName;
+      link.click();
+    }
+    setShowDownloadMenu(false);
+  };
 
   return (
     <div className="sticky bottom-0 left-0 right-0 flex h-[var(--resume-control-bar-height)] items-center justify-center px-[var(--resume-padding)] text-gray-600 lg:justify-between">
@@ -61,14 +102,33 @@ const ResumeControlBar = ({
           <span className="select-none">Autoscale</span>
         </label>
       </div>
-      <a
-        className="ml-1 flex items-center gap-1 rounded-md border border-gray-300 px-3 py-0.5 hover:bg-gray-100 lg:ml-8"
-        href={instance.url!}
-        download={fileName}
-      >
-        <ArrowDownTrayIcon className="h-4 w-4" />
-        <span className="whitespace-nowrap">Download Resume</span>
-      </a>
+      <div className="relative" ref={menuRef}>
+        <button
+          className="ml-1 flex items-center gap-1 rounded-md border border-gray-300 px-3 py-0.5 hover:bg-gray-100 lg:ml-8"
+          onClick={() => setShowDownloadMenu(!showDownloadMenu)}
+        >
+          <ArrowDownTrayIcon className="h-4 w-4" />
+          <span className="whitespace-nowrap">下载简历</span>
+          <ChevronDownIcon className="h-3 w-3" />
+        </button>
+        
+        {showDownloadMenu && (
+          <div className="absolute right-0 bottom-full mb-2 bg-white border border-gray-300 rounded-md shadow-lg py-1 z-10 min-w-[140px]">
+            <button
+              className="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm"
+              onClick={handleDownloadPdf}
+            >
+              下载PDF
+            </button>
+            <button
+              className="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm"
+              onClick={handleDownloadYaml}
+            >
+              下载YAML
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

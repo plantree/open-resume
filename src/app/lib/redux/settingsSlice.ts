@@ -45,7 +45,7 @@ export const initialSettings: Settings = {
   themeColor: DEFAULT_THEME_COLOR,
   fontFamily: DEFAULT_FONT_FAMILY,
   fontSize: DEFAULT_FONT_SIZE,
-  documentSize: "Letter",
+  documentSize: "A4",
   formToShow: {
     workExperiences: true,
     educations: true,

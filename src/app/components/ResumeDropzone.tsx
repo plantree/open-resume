@@ -2,6 +2,7 @@ import { useState } from "react";
 import { LockClosedIcon } from "@heroicons/react/24/solid";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { parseResumeFromPdf } from "lib/parse-resume-from-pdf";
+import { parseResumeFromYaml } from "lib/yaml-utils";
 import {
   getHasUsedAppBefore,
   saveStateToLocalStorage,
@@ -17,6 +18,7 @@ const defaultFileState = {
   name: "",
   size: 0,
   fileUrl: "",
+  type: "",
 };
 
 export const ResumeDropzone = ({
@@ -30,7 +32,8 @@ export const ResumeDropzone = ({
 }) => {
   const [file, setFile] = useState(defaultFileState);
   const [isHoveredOnDropzone, setIsHoveredOnDropzone] = useState(false);
-  const [hasNonPdfFile, setHasNonPdfFile] = useState(false);
+  const [hasInvalidFile, setHasInvalidFile] = useState(false);
+  const [fileError, setFileError] = useState("");
   const router = useRouter();
 
   const hasFile = Boolean(file.name);
@@ -40,20 +43,26 @@ export const ResumeDropzone = ({
       URL.revokeObjectURL(file.fileUrl);
     }
 
-    const { name, size } = newFile;
+    const { name, size, type } = newFile;
     const fileUrl = URL.createObjectURL(newFile);
-    setFile({ name, size, fileUrl });
+    setFile({ name, size, fileUrl, type });
     onFileUrlChange(fileUrl);
+  };
+
+  const isValidFileType = (fileName: string): boolean => {
+    return fileName.endsWith(".pdf") || fileName.endsWith(".yaml") || fileName.endsWith(".yml");
   };
 
   const onDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     const newFile = event.dataTransfer.files[0];
-    if (newFile.name.endsWith(".pdf")) {
-      setHasNonPdfFile(false);
+    if (isValidFileType(newFile.name)) {
+      setHasInvalidFile(false);
+      setFileError("");
       setNewFile(newFile);
     } else {
-      setHasNonPdfFile(true);
+      setHasInvalidFile(true);
+      setFileError("仅支持PDF和YAML文件(.pdf, .yaml, .yml)");
     }
     setIsHoveredOnDropzone(false);
   };
@@ -63,7 +72,14 @@ export const ResumeDropzone = ({
     if (!files) return;
 
     const newFile = files[0];
-    setNewFile(newFile);
+    if (isValidFileType(newFile.name)) {
+      setHasInvalidFile(false);
+      setFileError("");
+      setNewFile(newFile);
+    } else {
+      setHasInvalidFile(true);
+      setFileError("仅支持PDF和YAML文件(.pdf, .yaml, .yml)");
+    }
   };
 
   const onRemove = () => {
@@ -72,26 +88,50 @@ export const ResumeDropzone = ({
   };
 
   const onImportClick = async () => {
-    const resume = await parseResumeFromPdf(file.fileUrl);
-    const settings = deepClone(initialSettings);
+    try {
+      let resume;
+      let settings = deepClone(initialSettings);
 
-    // Set formToShow settings based on uploaded resume if users have used the app before
-    if (getHasUsedAppBefore()) {
-      const sections = Object.keys(settings.formToShow) as ShowForm[];
-      const sectionToFormToShow: Record<ShowForm, boolean> = {
-        workExperiences: resume.workExperiences.length > 0,
-        educations: resume.educations.length > 0,
-        projects: resume.projects.length > 0,
-        skills: resume.skills.descriptions.length > 0,
-        custom: resume.custom.descriptions.length > 0,
-      };
-      for (const section of sections) {
-        settings.formToShow[section] = sectionToFormToShow[section];
+      if (file.name.endsWith(".pdf")) {
+        // 处理PDF文件
+        resume = await parseResumeFromPdf(file.fileUrl);
+      } else if (file.name.endsWith(".yaml") || file.name.endsWith(".yml")) {
+        // 处理YAML文件
+        const response = await fetch(file.fileUrl);
+        const yamlContent = await response.text();
+        const result = parseResumeFromYaml(yamlContent);
+        resume = result.resume;
+        
+        // 如果YAML包含设置信息，使用它
+        if (result.settings) {
+          settings = result.settings;
+        }
+      } else {
+        throw new Error("不支持的文件格式");
       }
-    }
 
-    saveStateToLocalStorage({ resume, settings });
-    router.push("/resume-builder");
+      // Set formToShow settings based on uploaded resume if users have used the app before
+      if (getHasUsedAppBefore()) {
+        const sections = Object.keys(settings.formToShow) as ShowForm[];
+        const sectionToFormToShow: Record<ShowForm, boolean> = {
+          workExperiences: resume.workExperiences.length > 0,
+          educations: resume.educations.length > 0,
+          projects: resume.projects.length > 0,
+          skills: resume.skills.descriptions.length > 0,
+          custom: resume.custom.descriptions.length > 0,
+        };
+        for (const section of sections) {
+          settings.formToShow[section] = sectionToFormToShow[section];
+        }
+      }
+
+      saveStateToLocalStorage({ resume, settings });
+      router.push("/resume-builder");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "文件导入失败";
+      setFileError(errorMessage);
+      setHasInvalidFile(true);
+    }
   };
 
   return (
@@ -132,11 +172,14 @@ export const ResumeDropzone = ({
                 !playgroundView && "text-lg font-semibold"
               )}
             >
-              浏览PDF文件或将其拖放到此处
+              浏览文件或将其拖放到此处
             </p>
             <p className="flex text-sm text-gray-500">
               <LockClosedIcon className="mr-1 mt-1 h-3 w-3 text-gray-400" />
               文件数据仅在本地使用，不会离开您的浏览器
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              支持PDF和YAML格式 (.pdf, .yaml, .yml)
             </p>
           </>
         ) : (
@@ -167,12 +210,12 @@ export const ResumeDropzone = ({
                 <input
                   type="file"
                   className="sr-only"
-                  accept=".pdf"
+                  accept=".pdf,.yaml,.yml"
                   onChange={onInputChange}
                 />
               </label>
-              {hasNonPdfFile && (
-                <p className="mt-6 text-red-400">仅支持PDF文件</p>
+              {hasInvalidFile && (
+                <p className="mt-6 text-red-400">{fileError}</p>
               )}
             </>
           ) : (
