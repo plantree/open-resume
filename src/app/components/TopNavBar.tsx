@@ -33,7 +33,7 @@ export const TopNavBar = () => {
         >
           {[
             ["/resume-builder", "生成器"],
-            ["/resume-parser", "解析器"],
+            ["/resume-import", "解析器"],
           ].map(([href, text]) => (
             <Link
               key={text}
