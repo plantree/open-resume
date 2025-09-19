@@ -1,5 +1,6 @@
 import "globals.css";
 import { TopNavBar } from "components/TopNavBar";
+import { Footer } from "components/Footer";
 import { Analytics } from "@vercel/analytics/react";
 
 export const metadata = {
@@ -52,9 +53,12 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <link rel="shortcut icon" href="/favicon.ico" />
       </head>
-      <body>
+      <body className="flex flex-col min-h-screen">
         <TopNavBar />
-        {children}
+        <main className="flex-1">
+          {children}
+        </main>
+        <Footer />
         <Analytics />
       </body>
     </html>

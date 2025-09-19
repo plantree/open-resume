@@ -21,10 +21,10 @@ export const Hero = () => {
         <p className="ml-6 mt-3 text-sm text-gray-600">无需注册</p>
         <p className="mt-3 text-sm text-gray-600 lg:mt-36">
           已有简历？使用{" "}
-          <Link href="/resume-parser" className="underline underline-offset-2">
+          <Link href="/resume-import" className="underline underline-offset-2">
             简历解析器
           </Link>
-          {" "}测试其ATS可读性
+          {" "}导入已有简历
         </p>
       </div>
       <FlexboxSpacer maxWidth={100} minWidth={50} className="hidden lg:block" />
