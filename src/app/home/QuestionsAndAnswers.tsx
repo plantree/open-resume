@@ -45,11 +45,16 @@ const QAS = [
   {
     question: "Q3. 谁创建了OpenResume，为什么要创建它？",
     answer: (
-      <p>
-        OpenResume是由{" "}
-        <Link href="https://github.com/xitanggg">Xitang Zhao</Link>创建的，并由{" "}
-        <Link href="https://www.linkedin.com/in/imzhi">Zhigang Wen</Link>设计，作为一个周末项目。作为美国的移民，我们在创建第一份简历和申请实习及工作时犯了很多错误。我们花了很长时间才学会一些最佳实践。在指导第一代学生并审查他们的简历时，我们注意到学生们犯了和我们以前一样的错误。这让我们思考如何利用我们获得的知识和技能来帮助他们。我们开始在周末聊天和工作，最终创建了OpenResume，我们将最佳实践和知识整合到这个简历生成器中。我们希望OpenResume能够帮助任何人轻松创建遵循最佳实践的现代专业简历，让任何人都能自信地申请工作。
-      </p>
+      <>
+        <p>
+          OpenResume是由{" "}
+          <Link href="https://github.com/xitanggg">Xitang Zhao</Link>创建的，并由{" "}
+          <Link href="https://www.linkedin.com/in/imzhi">Zhigang Wen</Link>设计，作为一个周末项目。作为美国的移民，我们在创建第一份简历和申请实习及工作时犯了很多错误。我们花了很长时间才学会一些最佳实践。在指导第一代学生并审查他们的简历时，我们注意到学生们犯了和我们以前一样的错误。这让我们思考如何利用我们获得的知识和技能来帮助他们。我们开始在周末聊天和工作，最终创建了OpenResume，我们将最佳实践和知识整合到这个简历生成器中。我们希望OpenResume能够帮助任何人轻松创建遵循最佳实践的现代专业简历，让任何人都能自信地申请工作。
+        </p>
+        <p>
+          汉化的工作由 <Link href="https://plantree.me">Plantree</Link> 完成，并增加了 PWA 支持，以及 YAML 格式的导入/导出。
+        </p>
+      </>
     ),
   },
   {
