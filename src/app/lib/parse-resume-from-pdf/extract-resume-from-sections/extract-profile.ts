@@ -200,6 +200,7 @@ export const extractProfile = (sections: ResumeSectionToLines) => {
       url,
       // Dedicated section takes higher precedence over profile summary
       summary: summarySection || objectiveSection || summary,
+      photoUrl: "",
     },
     // For debugging
     profileScores: {

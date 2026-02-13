@@ -16,6 +16,7 @@ export const END_HOME_RESUME: Resume = {
     phone: "138-0000-0000",
     location: "北京, 中国",
     url: "linkedin.com/in/zhangsan",
+    photoUrl: "",
   },
   workExperiences: [
     {

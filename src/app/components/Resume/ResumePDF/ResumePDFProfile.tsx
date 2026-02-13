@@ -1,4 +1,4 @@
-import { View } from "@react-pdf/renderer";
+import { View, Image } from "@react-pdf/renderer";
 import {
   ResumePDFIcon,
   type IconType,
@@ -20,19 +20,53 @@ export const ResumePDFProfile = ({
   themeColor: string;
   isPDF: boolean;
 }) => {
-  const { name, email, phone, url, summary, location } = profile;
+  const { name, email, phone, url, summary, location, photoUrl } = profile;
   const iconProps = { email, phone, location, url };
+
+  const PhotoComponent = photoUrl ? (
+    isPDF ? (
+      <Image
+        src={photoUrl}
+        style={{
+          width: "56pt",
+          height: "56pt",
+          borderRadius: "28pt",
+          objectFit: "cover" as any,
+        }}
+      />
+    ) : (
+      <img
+        src={photoUrl}
+        alt=""
+        style={{
+          width: "56pt",
+          height: "56pt",
+          borderRadius: "28pt",
+          objectFit: "cover",
+        }}
+      />
+    )
+  ) : null;
 
   return (
     <ResumePDFSection style={{ marginTop: spacing["4"] }}>
-      <ResumePDFText
-        bold={true}
-        themeColor={themeColor}
-        style={{ fontSize: "20pt" }}
-      >
-        {name}
-      </ResumePDFText>
-      {summary && <ResumePDFText>{summary}</ResumePDFText>}
+      <View style={{ ...styles.flexRow, alignItems: "center", gap: spacing["3"] }}>
+        {PhotoComponent}
+        <View style={{ ...styles.flexCol, flex: 1 }}>
+          <ResumePDFText
+            bold={true}
+            themeColor={themeColor}
+            style={{ fontSize: "20pt" }}
+          >
+            {name}
+          </ResumePDFText>
+          {summary && (
+            <ResumePDFText style={{ marginTop: spacing["1"] }}>
+              {summary}
+            </ResumePDFText>
+          )}
+        </View>
+      </View>
       <View
         style={{
           ...styles.flexRowBetween,
