@@ -3,27 +3,31 @@ import { Font } from "@react-pdf/renderer";
 import { ENGLISH_FONT_FAMILIES } from "components/fonts/constants";
 import { getAllFontFamiliesToLoad } from "components/fonts/lib";
 
+// Register all fonts immediately (not in useEffect) so they are available
+// before the first usePDF render call. This prevents the initial render
+// from using a fallback font for CJK characters.
+const allFontFamilies = getAllFontFamiliesToLoad();
+allFontFamilies.forEach((fontFamily) => {
+  Font.register({
+    family: fontFamily,
+    fonts: [
+      {
+        src: `/fonts/${fontFamily}-Regular.ttf`,
+      },
+      {
+        src: `/fonts/${fontFamily}-Bold.ttf`,
+        fontWeight: "bold",
+      },
+    ],
+  });
+});
+
 /**
- * Register all fonts to React PDF so it can render fonts correctly in PDF
+ * Hook kept for backward compatibility - fonts are now registered at module load time.
  */
 export const useRegisterReactPDFFont = () => {
-  useEffect(() => {
-    const allFontFamilies = getAllFontFamiliesToLoad();
-    allFontFamilies.forEach((fontFamily) => {
-      Font.register({
-        family: fontFamily,
-        fonts: [
-          {
-            src: `fonts/${fontFamily}-Regular.ttf`,
-          },
-          {
-            src: `fonts/${fontFamily}-Bold.ttf`,
-            fontWeight: "bold",
-          },
-        ],
-      });
-    });
-  }, []);
+  // Font registration is now done at module scope above.
+  // This hook is kept so existing call sites don't break.
 };
 
 export const useRegisterReactPDFHyphenationCallback = (fontFamily: string) => {

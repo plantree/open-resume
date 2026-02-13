@@ -53,7 +53,11 @@ export const Resume = () => {
             setScale={setScale}
             documentSize={settings.documentSize}
             document={document}
-            fileName={resume.profile.name + " - Resume"}
+            fileName={[
+              resume.profile.name,
+              resume.profile.summary,
+              resume.profile.phone,
+            ].filter(Boolean).join("-") || "Resume"}
             resume={resume}
             settings={settings}
           />

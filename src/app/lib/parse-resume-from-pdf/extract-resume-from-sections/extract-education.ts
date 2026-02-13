@@ -29,11 +29,19 @@ import {
 const SCHOOLS = ['College', 'University', 'Institute', 'School', 'Academy', 'BASIS', 'Magnet']
 const hasSchool = (item: TextItem) =>
   SCHOOLS.some((school) => item.text.includes(school));
+// Chinese school keywords
+const CHINESE_SCHOOLS = ['大学', '学院', '中学', '高中', '学校'];
+const hasChineseSchool = (item: TextItem) =>
+  CHINESE_SCHOOLS.some((school) => item.text.includes(school));
 // prettier-ignore
 const DEGREES = ["Associate", "Bachelor", "Master", "PhD", "Ph."];
 const hasDegree = (item: TextItem) =>
   DEGREES.some((degree) => item.text.includes(degree)) ||
   /[ABM][A-Z\.]/.test(item.text); // Match AA, B.S., MBA, etc.
+// Chinese degree keywords
+const CHINESE_DEGREES = ['博士', '硕士', '本科', '学士', '专科', '大专', '研究生', 'MBA', 'EMBA'];
+const hasChineseDegree = (item: TextItem) =>
+  CHINESE_DEGREES.some((degree) => item.text.includes(degree));
 const matchGPA = (item: TextItem) => item.text.match(/[0-4]\.\d{1,2}/);
 const matchGrade = (item: TextItem) => {
   const grade = parseFloat(item.text);
@@ -45,13 +53,17 @@ const matchGrade = (item: TextItem) => {
 
 const SCHOOL_FEATURE_SETS: FeatureSet[] = [
   [hasSchool, 4],
+  [hasChineseSchool, 4],
   [hasDegree, -4],
+  [hasChineseDegree, -4],
   [hasNumber, -4],
 ];
 
 const DEGREE_FEATURE_SETS: FeatureSet[] = [
   [hasDegree, 4],
+  [hasChineseDegree, 4],
   [hasSchool, -4],
+  [hasChineseSchool, -4],
   [hasNumber, -3],
 ];
 

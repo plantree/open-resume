@@ -58,9 +58,17 @@ export const groupTextItemsIntoLines = (textItems: TextItems): Lines => {
 };
 
 // Sometimes a space is lost while merging adjacent text items. This accounts for some of those cases
+// But for Chinese text, spaces between characters are typically not needed
+const isChinese = (char: string) => /[\u4e00-\u9fa5]/.test(char);
 const shouldAddSpaceBetweenText = (leftText: string, rightText: string) => {
   const leftTextEnd = leftText[leftText.length - 1];
   const rightTextStart = rightText[0];
+
+  // Don't add space between Chinese characters
+  if (isChinese(leftTextEnd) || isChinese(rightTextStart)) {
+    return false;
+  }
+
   const conditions = [
     [":", ",", "|", ".", ...BULLET_POINTS].includes(leftTextEnd) &&
       rightTextStart !== " ",

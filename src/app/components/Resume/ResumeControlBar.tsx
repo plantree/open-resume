@@ -70,7 +70,7 @@ const ResumeControlBar = ({
     if (instance.url) {
       const link = window.document.createElement('a');
       link.href = instance.url;
-      link.download = fileName;
+      link.download = fileName.endsWith('.pdf') ? fileName : `${fileName}.pdf`;
       link.click();
     }
     setShowDownloadMenu(false);

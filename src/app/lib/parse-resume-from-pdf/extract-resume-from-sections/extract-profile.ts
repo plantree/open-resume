@@ -10,28 +10,43 @@ import {
   hasComma,
   hasLetter,
   hasLetterAndIsAllUpperCase,
+  hasChinese,
+  hasOnlyChineseOrLetters,
 } from "lib/parse-resume-from-pdf/extract-resume-from-sections/lib/common-features";
 import { getTextWithHighestFeatureScore } from "lib/parse-resume-from-pdf/extract-resume-from-sections/lib/feature-scoring-system";
 
-// Name
+// Name - English
 export const matchOnlyLetterSpaceOrPeriod = (item: TextItem) =>
   item.text.match(/^[a-zA-Z\s\.]+$/);
+// Name - Chinese (2-4 Chinese characters, may include ·)
+const matchChineseName = (item: TextItem) =>
+  item.text.match(/^[\u4e00-\u9fa5\u00b7\u2022]{2,4}$/);
+const isChineseNameLike = (item: TextItem) => {
+  const text = item.text.trim();
+  return /^[\u4e00-\u9fa5\u00b7\u2022]{2,4}$/.test(text);
+};
 
 // Email
 // Simple email regex: xxx@xxx.xxx (xxx = anything not space)
 export const matchEmail = (item: TextItem) => item.text.match(/\S+@\S+\.\S+/);
 const hasAt = (item: TextItem) => item.text.includes("@");
 
-// Phone
+// Phone - English
 // Simple phone regex that matches (xxx)-xxx-xxxx where () and - are optional, - can also be space
 export const matchPhone = (item: TextItem) =>
   item.text.match(/\(?\d{3}\)?[\s-]?\d{3}[\s-]?\d{4}/);
+// Phone - Chinese (11 digits starting with 1, may have +86 prefix)
+export const matchChinesePhone = (item: TextItem) =>
+  item.text.match(/(?:\+?86[\s-]?)?1[3-9]\d{9}/);
 const hasParenthesis = (item: TextItem) => /\([0-9]+\)/.test(item.text);
 
-// Location
+// Location - English
 // Simple location regex that matches "<City>, <ST>"
 export const matchCityAndState = (item: TextItem) =>
   item.text.match(/[A-Z][a-zA-Z\s]+, [A-Z]{2}/);
+// Location - Chinese (common city/province patterns)
+const matchChineseLocation = (item: TextItem) =>
+  item.text.match(/[\u4e00-\u9fa5]{2,}(?:\u7701|\u5e02|\u533a|\u53bf)/);
 
 // Url
 // Simple url regex that matches "xxx.xxx/xxx" (xxx = anything not space)
@@ -45,7 +60,13 @@ const matchUrlWwwFallback = (item: TextItem) =>
 const hasSlash = (item: TextItem) => item.text.includes("/");
 
 // Summary
-const has4OrMoreWords = (item: TextItem) => item.text.split(" ").length >= 4;
+const has4OrMoreWords = (item: TextItem) => {
+  // For Chinese text, count characters instead of words (Chinese doesn't use spaces between words)
+  if (/[\u4e00-\u9fa5]/.test(item.text)) {
+    return item.text.length >= 8;
+  }
+  return item.text.split(" ").length >= 4;
+};
 
 /**
  *              Unique Attribute
@@ -61,9 +82,12 @@ const has4OrMoreWords = (item: TextItem) => item.text.split(" ").length >= 4;
  * Name -> contains only letters/space/period, e.g. Leonardo W. DiCaprio
  *         (it isn't common to include middle initial in resume)
  *      -> is bolded or has all letters as uppercase
+ *      -> or is a Chinese name (2-4 Chinese characters)
  */
 const NAME_FEATURE_SETS: FeatureSet[] = [
   [matchOnlyLetterSpaceOrPeriod, 3, true],
+  [matchChineseName, 4, true],
+  [isChineseNameLike, 3],
   [isBold, 2],
   [hasLetterAndIsAllUpperCase, 2],
   // Match against other unique attributes
@@ -86,15 +110,17 @@ const EMAIL_FEATURE_SETS: FeatureSet[] = [
   [has4OrMoreWords, -4], // Summary
 ];
 
-// Phone -> match phone regex (xxx)-xxx-xxxx
+// Phone -> match phone regex (xxx)-xxx-xxxx or Chinese phone 1xxxxxxxxxx
 const PHONE_FEATURE_SETS: FeatureSet[] = [
   [matchPhone, 4, true],
+  [matchChinesePhone, 4, true],
   [hasLetter, -4], // Name, Email, Location, Url, Summary
 ];
 
-// Location -> match location regex <City>, <ST>
+// Location -> match location regex <City>, <ST> or Chinese location
 const LOCATION_FEATURE_SETS: FeatureSet[] = [
   [matchCityAndState, 4, true],
+  [matchChineseLocation, 3, true],
   [isBold, -1], // Name
   [hasAt, -4], // Email
   [hasParenthesis, -3], // Phone
@@ -113,13 +139,14 @@ const URL_FEATURE_SETS: FeatureSet[] = [
   [has4OrMoreWords, -4], // Summary
 ];
 
-// Summary -> has 4 or more words
+// Summary -> has 4 or more words (or 8+ Chinese characters)
 const SUMMARY_FEATURE_SETS: FeatureSet[] = [
   [has4OrMoreWords, 4],
   [isBold, -1], // Name
   [hasAt, -4], // Email
   [hasParenthesis, -3], // Phone
   [matchCityAndState, -4, false], // Location
+  [matchChineseLocation, -3, false], // Location
 ];
 
 export const extractProfile = (sections: ResumeSectionToLines) => {
