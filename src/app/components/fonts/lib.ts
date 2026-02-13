@@ -20,5 +20,7 @@ const getPreferredNonEnglishFontFamilies = () => {
 };
 
 export const getAllFontFamiliesToLoad = () => {
-  return [...ENGLISH_FONT_FAMILIES, ...getPreferredNonEnglishFontFamilies()];
+  // Always load all non-English fonts (e.g. NotoSansSC) to ensure Chinese
+  // characters render correctly in PDF export regardless of browser language.
+  return [...ENGLISH_FONT_FAMILIES, ...NON_ENGLISH_FONT_FAMILIES];
 };

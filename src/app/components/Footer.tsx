@@ -1,14 +1,14 @@
 export const Footer = () => {
   return (
-    <footer className="bg-gray-50 border-t border-gray-200 py-6 mt-auto">
-      <div className="container mx-auto px-4 text-center">
-        <p className="text-sm text-gray-600">
-          Copyright © 2025{" "}
-          <a 
-            href="https://plantree.me" 
-            target="_blank" 
+    <footer className="mt-auto border-t border-gray-100 bg-white">
+      <div className="mx-auto max-w-screen-2xl px-8 py-8 lg:px-12">
+        <p className="text-center text-sm text-gray-400">
+          © {new Date().getFullYear()}{" "}
+          <a
+            href="https://plantree.me"
+            target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:text-blue-800 underline"
+            className="text-gray-500 transition-colors hover:text-gray-700"
           >
             Plantree
           </a>
