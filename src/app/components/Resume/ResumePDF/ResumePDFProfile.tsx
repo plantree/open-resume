@@ -21,7 +21,7 @@ export const ResumePDFProfile = ({
   isPDF: boolean;
 }) => {
   const { name, email, phone, url, summary, location, photoUrl } = profile;
-  const iconProps = { email, phone, location, url };
+  const iconProps = { location, email, phone, url };
 
   const PhotoComponent = photoUrl ? (
     isPDF ? (

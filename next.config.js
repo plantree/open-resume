@@ -25,6 +25,9 @@ const nextConfig = {
   // the canvas package for webpack
   // https://github.com/mozilla/pdf.js/issues/16214
   output: 'standalone',
+  images: {
+    unoptimized: true,
+  },
   webpack: (config) => {
     // Setting resolve.alias to false tells webpack to ignore a module
     // https://webpack.js.org/configuration/resolve/#resolvealias
