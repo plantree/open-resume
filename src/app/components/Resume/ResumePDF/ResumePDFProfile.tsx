@@ -74,6 +74,7 @@ export const ResumePDFProfile = ({
           ...styles.flexRowBetween,
           flexWrap: "wrap",
           marginTop: spacing["0.5"],
+          ...(photoUrl ? { marginLeft: "65pt" } : {}),
         }}
       >
         {Object.entries(iconProps).map(([key, value]) => {
