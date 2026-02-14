@@ -15,10 +15,12 @@ export const ResumePDFProfile = ({
   profile,
   themeColor,
   isPDF,
+  style = {},
 }: {
   profile: ResumeProfile;
   themeColor: string;
   isPDF: boolean;
+  style?: import("@react-pdf/types").Style;
 }) => {
   const { name, email, phone, url, summary, location, photoUrl } = profile;
   const iconProps = { location, email, phone, url };
@@ -49,7 +51,7 @@ export const ResumePDFProfile = ({
   ) : null;
 
   return (
-    <ResumePDFSection style={{ marginTop: spacing["4"] }}>
+    <ResumePDFSection style={{ marginTop: spacing["4"], ...style }}>
       <View style={{ ...styles.flexRow, alignItems: "center", gap: spacing["3"] }}>
         {PhotoComponent}
         <View style={{ ...styles.flexCol, flex: 1 }}>

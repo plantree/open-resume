@@ -12,14 +12,18 @@ export const ResumePDFEducation = ({
   educations,
   themeColor,
   showBulletPoints,
+  sectionMarginTop,
+  sectionGap,
 }: {
   heading: string;
   educations: ResumeEducation[];
   themeColor: string;
   showBulletPoints: boolean;
+  sectionMarginTop?: string;
+  sectionGap?: string;
 }) => {
   return (
-    <ResumePDFSection themeColor={themeColor} heading={heading}>
+    <ResumePDFSection themeColor={themeColor} heading={heading} sectionMarginTop={sectionMarginTop} sectionGap={sectionGap}>
       {educations.map(
         ({ school, degree, date, gpa, descriptions = [] }, idx) => {
           // Hide school name if it is the same as the previous school

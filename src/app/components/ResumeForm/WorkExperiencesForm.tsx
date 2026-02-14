@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Form, FormSection } from "components/ResumeForm/Form";
 import {
   Input,
@@ -14,8 +15,23 @@ import type { ResumeWorkExperience } from "lib/redux/types";
 export const WorkExperiencesForm = () => {
   const workExperiences = useAppSelector(selectWorkExperiences);
   const dispatch = useAppDispatch();
-
   const showDelete = workExperiences.length > 1;
+
+  // Track which entries have descriptions expanded.
+  // Initialize: show descriptions if the entry already has non-empty descriptions.
+  const [showDescriptions, setShowDescriptions] = useState<
+    Record<number, boolean>
+  >(() => {
+    const init: Record<number, boolean> = {};
+    workExperiences.forEach((we, idx) => {
+      init[idx] = we.descriptions.some((d) => d.trim() !== "");
+    });
+    return init;
+  });
+
+  const toggleDescriptions = (idx: number) => {
+    setShowDescriptions((prev) => ({ ...prev, [idx]: !prev[idx] }));
+  };
 
   return (
     <Form form="workExperiences" addButtonText="添加工作">
@@ -33,6 +49,8 @@ export const WorkExperiencesForm = () => {
         };
         const showMoveUp = idx !== 0;
         const showMoveDown = idx !== workExperiences.length - 1;
+
+        const hasDescriptions = showDescriptions[idx] ?? descriptions.some((d) => d.trim() !== "");
 
         return (
           <FormSection
@@ -68,14 +86,26 @@ export const WorkExperiencesForm = () => {
               value={date}
               onChange={handleWorkExperienceChange}
             />
-            <BulletListTextarea
-              label="描述"
-              labelClassName="col-span-full"
-              name="descriptions"
-              placeholder="要点描述"
-              value={descriptions}
-              onChange={handleWorkExperienceChange}
-            />
+            {hasDescriptions ? (
+              <BulletListTextarea
+                label="描述"
+                labelClassName="col-span-full"
+                name="descriptions"
+                placeholder="要点描述"
+                value={descriptions}
+                onChange={handleWorkExperienceChange}
+              />
+            ) : (
+              <div className="col-span-full flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => toggleDescriptions(idx)}
+                  className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+                >
+                  <span>+ 添加描述</span>
+                </button>
+              </div>
+            )}
           </FormSection>
         );
       })}

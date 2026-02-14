@@ -9,17 +9,21 @@ export const ResumePDFSection = ({
   heading,
   style = {},
   children,
+  sectionMarginTop,
+  sectionGap,
 }: {
   themeColor?: string;
   heading?: string;
   style?: Style;
   children: React.ReactNode;
+  sectionMarginTop?: string;
+  sectionGap?: string;
 }) => (
   <View
     style={{
       ...styles.flexCol,
-      gap: spacing["2"],
-      marginTop: spacing["5"],
+      gap: sectionGap || spacing["2"],
+      marginTop: sectionMarginTop || spacing["5"],
       ...style,
     }}
   >
@@ -85,7 +89,7 @@ export const ResumePDFBulletList = ({
 }) => {
   return (
     <>
-      {items.map((item, idx) => (
+      {items.filter((item) => item.trim()).map((item, idx) => (
         <View style={{ ...styles.flexRow }} key={idx}>
           {showBulletPoints && (
             <ResumePDFText
