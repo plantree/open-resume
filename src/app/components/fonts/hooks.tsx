@@ -22,6 +22,48 @@ allFontFamilies.forEach((fontFamily) => {
   });
 });
 
+// Hyphenation callback for CJK fonts - keeps English words together while allowing CJK to wrap
+const cjkHyphenationCallback = (word: string): string[] => {
+  // Check if word is pure ASCII (English/numbers/symbols)
+  const isAsciiWord = /^[\x00-\x7F]+$/.test(word);
+  if (isAsciiWord) {
+    // Keep English words together
+    return [word];
+  }
+  
+  // For mixed or CJK text, split but keep ASCII sequences together
+  const result: string[] = [];
+  let asciiBuffer = "";
+  
+  for (const char of word) {
+    const isAscii = char.charCodeAt(0) <= 0x7f;
+    if (isAscii) {
+      asciiBuffer += char;
+    } else {
+      // Flush ASCII buffer if any
+      if (asciiBuffer) {
+        result.push(asciiBuffer);
+        asciiBuffer = "";
+      }
+      // Add CJK character with empty string for wrapping
+      result.push(char, "");
+    }
+  }
+  // Flush remaining ASCII buffer
+  if (asciiBuffer) {
+    result.push(asciiBuffer);
+  }
+  
+  return result;
+};
+
+// Hyphenation callback for English fonts - no hyphenation
+const englishHyphenationCallback = (word: string): string[] => [word];
+
+// Register default hyphenation callback at module load time
+// Default to CJK callback since it handles both CJK and English text correctly
+Font.registerHyphenationCallback(cjkHyphenationCallback);
+
 /**
  * Hook kept for backward compatibility - fonts are now registered at module load time.
  */
@@ -33,19 +75,9 @@ export const useRegisterReactPDFFont = () => {
 export const useRegisterReactPDFHyphenationCallback = (fontFamily: string) => {
   useEffect(() => {
     if (ENGLISH_FONT_FAMILIES.includes(fontFamily as any)) {
-      // Disable hyphenation for English Font Family so the word wraps each line
-      // https://github.com/diegomura/react-pdf/issues/311#issuecomment-548301604
-      Font.registerHyphenationCallback((word) => [word]);
+      Font.registerHyphenationCallback(englishHyphenationCallback);
     } else {
-      // React PDF doesn't understand how to wrap non-english word on line break
-      // A workaround is to add an empty character after each word
-      // Reference https://github.com/diegomura/react-pdf/issues/1568
-      Font.registerHyphenationCallback((word) =>
-        word
-          .split("")
-          .map((char) => [char, ""])
-          .flat()
-      );
+      Font.registerHyphenationCallback(cjkHyphenationCallback);
     }
   }, [fontFamily]);
 };

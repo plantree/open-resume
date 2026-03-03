@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import ContentEditable from "react-contenteditable";
 import { useAutosizeTextareaHeight } from "lib/hooks/useAutosizeTextareaHeight";
 
@@ -121,25 +121,66 @@ const BulletListTextareaGeneral = <T extends string>({
   onChange,
   showBulletPoints = true,
 }: InputProps<T, string[]> & { showBulletPoints?: boolean }) => {
-  const html = getHTMLFromBulletListStrings(bulletListStrings);
+  const contentEditableRef = useRef<HTMLDivElement>(null);
+  const htmlRef = useRef(getHTMLFromBulletListStrings(bulletListStrings));
+  const isComposingRef = useRef(false);
+
+  // Update htmlRef when bulletListStrings changes from external source (not user input)
+  useEffect(() => {
+    // Only update if not currently composing (IME input)
+    if (!isComposingRef.current) {
+      htmlRef.current = getHTMLFromBulletListStrings(bulletListStrings);
+    }
+  }, [bulletListStrings]);
+
+  const handleChange = useCallback(
+    (e: React.FormEvent<HTMLDivElement>) => {
+      if (e.type === "input") {
+        const target = e.currentTarget as HTMLDivElement;
+        const { innerText } = target;
+        // Update htmlRef to current innerHTML to prevent cursor jump
+        htmlRef.current = target.innerHTML;
+        // Only trigger onChange if not in IME composition
+        if (!isComposingRef.current) {
+          const newBulletListStrings =
+            getBulletListStringsFromInnerText(innerText);
+          onChange(name, newBulletListStrings);
+        }
+      }
+    },
+    [name, onChange]
+  );
+
+  const handleCompositionStart = useCallback(() => {
+    isComposingRef.current = true;
+  }, []);
+
+  const handleCompositionEnd = useCallback(
+    (e: React.CompositionEvent<HTMLDivElement>) => {
+      isComposingRef.current = false;
+      const target = e.currentTarget as HTMLDivElement;
+      const { innerText } = target;
+      htmlRef.current = target.innerHTML;
+      const newBulletListStrings = getBulletListStringsFromInnerText(innerText);
+      onChange(name, newBulletListStrings);
+    },
+    [name, onChange]
+  );
+
   return (
     <InputGroupWrapper label={label} className={wrapperClassName}>
       <ContentEditable
+        innerRef={contentEditableRef}
         contentEditable={true}
         className={`${INPUT_CLASS_NAME} cursor-text [&>div]:list-item ${
           showBulletPoints ? "pl-7" : "[&>div]:list-['']"
         }`}
         // Note: placeholder currently doesn't work
         placeholder={placeholder}
-        onChange={(e) => {
-          if (e.type === "input") {
-            const { innerText } = e.currentTarget as HTMLDivElement;
-            const newBulletListStrings =
-              getBulletListStringsFromInnerText(innerText);
-            onChange(name, newBulletListStrings);
-          }
-        }}
-        html={html}
+        onChange={handleChange}
+        onCompositionStart={handleCompositionStart}
+        onCompositionEnd={handleCompositionEnd}
+        html={htmlRef.current}
       />
     </InputGroupWrapper>
   );

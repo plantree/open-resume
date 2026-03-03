@@ -189,14 +189,14 @@ export const ResumePDF = ({
     { pad: 30, margin: 4, gap: 1.5, profM: 1.5 },
   ];
 
-  // Reserve bottom gap so content doesn't touch the page edge
-  const bottomMargin = 20; // ~7mm bottom gap
-  const targetHeight = pageHeight - bottomMargin;
+  // Reserve top and bottom padding so content doesn't touch the page edge
+  const verticalPadding = 20; // ~7mm top and bottom gap
+  const targetHeight = pageHeight - verticalPadding * 2;
 
   // Pick the loosest tier where estimated content fits
   let selectedTier = tiers[tiers.length - 1];
   for (const tier of tiers) {
-    const est = computeHeight(tier.pad, tier.margin, tier.gap, tier.profM);
+    const est = computeHeight(tier.pad, tier.margin, tier.gap, 0);
     if (est * 1.05 <= targetHeight) {
       selectedTier = tier;
       break;
@@ -283,15 +283,13 @@ export const ResumePDF = ({
           <View
             style={{
               ...styles.flexCol,
-              padding: `${spacing[0]} ${horizontalPadding}`,
-              paddingBottom: "20pt",
+              padding: `20pt ${horizontalPadding}`,
             }}
           >
             <ResumePDFProfile
               profile={profile}
               themeColor={themeColor}
               isPDF={isPDF}
-              style={{ marginTop: profileMarginTop }}
             />
             {showFormsOrder.map((form) => {
               const Component = formTypeToComponent[form];
